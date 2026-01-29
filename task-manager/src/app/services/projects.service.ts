@@ -71,4 +71,23 @@ export class ProjectsService {
       })
     );
   }
+
+  deleteProject(projectId: string) {
+    return this.http.delete(`${this.apiUrl}/${projectId}`).pipe(
+      tap(() => {
+        // עדכון ה-Signal: מסננים החוצה את הפרויקט שנמחק
+        this.myProjects.update(list => list.filter(p => p.id !== projectId));
+      })
+    );
+  }
+
+  updateProject(projectId: string, name: string) {
+    return this.http.patch<Project>(`${this.apiUrl}/${projectId}`, { name }).pipe(
+      tap((updatedProj) => {
+        this.myProjects.update(projects => 
+          projects.map(p => p.id === projectId ? updatedProj : p)
+        );
+      })
+    );
+  }
 }

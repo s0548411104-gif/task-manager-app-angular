@@ -22,6 +22,10 @@ export class ProjectList implements OnInit {
   isCreateOpen = signal(false);
   currentTeamId = '';
 
+  // --- משתנים חדשים לעריכה ---
+  editingProjectId = signal<string | null>(null); 
+  editNameControl = new FormControl('', [Validators.required, Validators.minLength(3)]);
+
   ngOnInit() {
     // 👇 התיקון החשוב: משיכת ה-ID מהכתובת
     // מנסה למצוא 'teamId'. אם לא מוצא, מנסה למצוא 'id'.
@@ -74,6 +78,47 @@ export class ProjectList implements OnInit {
         console.log('פרטי השגיאה:', err);
         alert('הודעת השגיאה מהשרת: ' + JSON.stringify(err.error || err.message));
       }
+    });
+  }
+
+  // --- הפונקציה החדשה למחיקה ---
+  deleteProject(projectId: string, event: Event) {
+    event.stopPropagation(); // מונע מהכרטיס להיפתח כשלוחצים על המחיקה
+    
+    if (confirm('בטוחה שאת רוצה למחוק את הפרויקט?')) {
+      this.projectsService.deleteProject(projectId).subscribe({
+        next: () => {
+          console.log('Project deleted');
+        },
+        error: (err) => {
+          console.error('Delete failed', err);
+          alert('שגיאה במחיקה');
+        }
+      });
+    }
+  }
+
+  // --- פונקציות חדשות לעריכה ---
+  
+  startEdit(project: any, event: Event) {
+    event.stopPropagation();
+    this.editingProjectId.set(project.id);
+    this.editNameControl.setValue(project.name);
+  }
+
+  cancelEdit(event: Event) {
+    event.stopPropagation();
+    this.editingProjectId.set(null);
+  }
+
+  saveEdit(projectId: string, event: Event) {
+    event.stopPropagation();
+    if (this.editNameControl.invalid) return;
+
+    const newName = this.editNameControl.value!;
+    this.projectsService.updateProject(projectId, newName).subscribe({
+      next: () => this.editingProjectId.set(null),
+      error: () => alert('שגיאה בעדכון השם')
     });
   }
 }

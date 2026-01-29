@@ -36,4 +36,13 @@ export class TeamsService {
       })
     );
   }
+
+  deleteTeam(teamId: string) {
+    return this.http.delete(`${this.apiUrl}/${teamId}`).pipe(
+      tap(() => {
+        // הסרת הצוות מהרשימה המקומית (Signal) ללא צורך בטעינה מחדש
+        this.myTeams.update(teams => teams.filter(t => t.id !== teamId));
+      })
+    );
+  }
 }

@@ -1,4 +1,4 @@
- <div class="page-container">
+<div class="page-container">
   <header class="Project-header">
     <h1>הפרויקטים שלי 🚀</h1>
     <button (click)="toggleCreate()" class="circle-btn">
@@ -8,7 +8,6 @@
 
   @if (isCreateOpen()) {
   <div class="create-team-box slide-in">
-    <!-- <input type="text" [formControl]="teamIdControl" placeholder="קוד צוות (Team ID)">  -->
     <input type="text" [formControl]="nameControl" placeholder="שם פרויקט חדש..."> 
     <input type="text" [formControl]="descControl" placeholder="תיאור הפרויקט...">
     
@@ -25,8 +24,24 @@
           <div class="project-card">
             <div class="card-header">
               <span class="id-tag">ID: {{ project.id }}</span>
-              <h3>{{ project.name }}</h3>
+              
+              @if (editingProjectId() === project.id) {
+                <div class="edit-mode-container" (click)="$event.stopPropagation()">
+                  <input type="text" [formControl]="editNameControl" class="edit-input">
+                  <div class="edit-btns">
+                    <button (click)="saveEdit(project.id, $event)" class="save-btn" title="שמור">✅</button>
+                    <button (click)="cancelEdit($event)" class="cancel-btn" title="ביטול">✖</button>
+                  </div>
+                </div>
+              } @else {
+                <h3>{{ project.name }}</h3>
+                <div class="header-actions">
+                  <button class="edit-btn" (click)="startEdit(project, $event)" title="ערוך שם">✏️</button>
+                  <button class="delete-btn" (click)="deleteProject(project.id, $event)" title="מחק פרויקט">🗑️</button>
+                </div>
+              }
             </div>
+
             <p class="desc">{{ project.description }}</p>
             
             <button class="enter-btn" [routerLink]="['/projects', project.id, 'tasks']">
@@ -42,4 +57,3 @@
     }
   </main>
 </div>
-

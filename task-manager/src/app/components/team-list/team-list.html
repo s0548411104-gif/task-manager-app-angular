@@ -34,7 +34,10 @@
     <div class="team-card">
       <div class="card-top">
         <h3>{{ team.name }}</h3>
-        <span class="icon">🏢</span>
+        <div class="card-actions">
+          <span class="icon">🏢</span>
+          <button class="delete-btn" (click)="deleteTeam(team.id, $event)" title="מחק צוות">🗑️</button>
+        </div>
       </div>
 
       <div class="card-info">

@@ -3,6 +3,7 @@ import { TeamsService } from '../../services/teams.service';
 import { FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
 import { DatePipe } from '@angular/common'; 
 import { RouterLink } from '@angular/router';
+
 @Component({
   selector: 'app-team-list',
   standalone: true,
@@ -16,6 +17,7 @@ export class TeamList implements OnInit {
   newTeamNameControl = new FormControl('', [Validators.required, Validators.minLength(3)]);
 
   isCreateOpen = signal(false);
+  
   ngOnInit() {
     this.teamsService.loadTeams();
   }
@@ -23,6 +25,7 @@ export class TeamList implements OnInit {
   toggleCreate() {
     this.isCreateOpen.update(value => !value);
   }
+
   createNewTeam() {
     if (this.newTeamNameControl.invalid) return;
     const name = this.newTeamNameControl.value!;
@@ -34,5 +37,24 @@ export class TeamList implements OnInit {
       },
       error: (err) => alert('שגיאה ביצירת הצוות')
     });
+  }
+
+  // הפונקציה החדשה למחיקת צוות
+  deleteTeam(id: string, event: Event) {
+    // מונע מהקליק לעבור לכרטיס עצמו (למנוע ניווט לפרויקטים)
+    event.stopPropagation();
+    
+    if (confirm('האם את בטוחה שברצונך למחוק את הצוות? פעולה זו תמחק גם את כל הפרויקטים המשויכים אליו.')) {
+      this.teamsService.deleteTeam(id).subscribe({
+        next: () => {
+          // הצוות ייעלם אוטומטית כי עדכנו את ה-Signal בסרוויס
+          console.log('Team deleted successfully');
+        },
+        error: (err) => {
+          const errorMessage = err.error?.message || 'אין הרשאות למחוק צוות זה';
+          alert('שגיאה במחיקה: ' + errorMessage);
+        }
+      });
+    }
   }
 }
