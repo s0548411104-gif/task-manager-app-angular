@@ -1,0 +1,53 @@
+<div class="page-container">
+
+  <header class="teams-header">
+    <h1>הצוותים שלי</h1>
+
+    <button (click)="toggleCreate()" class="circle-btn">
+      @if (isCreateOpen()) { ✖ } @else { ➕ }
+    </button>
+  </header>
+
+  @if (isCreateOpen()) {
+  <div class="create-team-box slide-in">
+    <input type="text" [formControl]="newTeamNameControl" placeholder="שם צוות חדש...">
+    <button (click)="createNewTeam()" [disabled]="newTeamNameControl.invalid">
+      שמור
+    </button>
+  </div>
+  }
+
+  <main class="teams-grid">
+
+    @if (teamsService.isLoading()) {
+    <div class="status-msg">טוען נתונים... ⏳</div>
+    }
+
+    @else if (teamsService.error()) {
+    <div class="status-msg error">שגיאה: {{ teamsService.error() }} ⚠️</div>
+    }
+
+    @else {
+
+    @for (team of teamsService.myTeams(); track team.id) {
+
+    <div class="team-card">
+      <div class="card-top">
+        <h3>{{ team.name }}</h3>
+        <span class="icon">🏢</span>
+      </div>
+
+      <div class="card-info">
+        <span>👥 {{ team.members?.length || 0 }} חברים</span>
+      </div>
+      <button class="enter-btn" [routerLink]="['/teams', team.id, 'projects']">צפה בפרויקטים</button>
+    </div>
+
+    } @empty {
+    <div class="empty-state">
+      <p>עדיין אין צוותים. זה הזמן ליצור את הראשון! 👆</p>
+    </div>
+    }
+    }
+  </main>
+</div>

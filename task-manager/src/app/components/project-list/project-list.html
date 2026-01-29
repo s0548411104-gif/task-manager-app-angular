@@ -1,0 +1,45 @@
+ <div class="page-container">
+  <header class="Project-header">
+    <h1>הפרויקטים שלי 🚀</h1>
+    <button (click)="toggleCreate()" class="circle-btn">
+      {{ isCreateOpen() ? '✖' : '➕' }}
+    </button>
+  </header>
+
+  @if (isCreateOpen()) {
+  <div class="create-team-box slide-in">
+    <!-- <input type="text" [formControl]="teamIdControl" placeholder="קוד צוות (Team ID)">  -->
+    <input type="text" [formControl]="nameControl" placeholder="שם פרויקט חדש..."> 
+    <input type="text" [formControl]="descControl" placeholder="תיאור הפרויקט...">
+    
+    <button (click)="createNewProj()" [disabled]="nameControl.invalid">שמור</button>
+  </div>
+  }
+
+  <main class="project-grid">
+    @if (projectsService.isLoading()) {
+      <p>טוען פרויקטים...</p>
+    } @else {
+      <div class="projects-grid">
+        @for (project of projectsService.myProjects(); track project.id) {
+          <div class="project-card">
+            <div class="card-header">
+              <span class="id-tag">ID: {{ project.id }}</span>
+              <h3>{{ project.name }}</h3>
+            </div>
+            <p class="desc">{{ project.description }}</p>
+            
+            <button class="enter-btn" [routerLink]="['/projects', project.id, 'tasks']">
+              צפה במשימות ➤
+            </button>
+
+            <div class="team-badge">צוות: {{ project.team_id }}</div>
+          </div>
+        } @empty {
+          <p>אין פרויקטים עדיין. צרי אחד!</p>
+        }
+      </div>
+    }
+  </main>
+</div>
+

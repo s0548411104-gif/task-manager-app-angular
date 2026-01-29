@@ -1,0 +1,25 @@
+<div class="app-container">
+
+  @if (authService.isAuthenticated()) {
+  <nav class="main-nav">
+    <div class="user-welcome">
+      !היי {{ authService.currentUser()?.name }}
+    </div>
+
+    <button (click)="authService.logout()" class="logout-btn">יציאה</button>
+
+
+    <div class="nav-links">
+      <a routerLink="/teams" routerLinkActive="active">צוותים</a>
+      <a routerLink="/projects" routerLinkActive="active">פרויקטים</a>
+      <a routerLink="/tasks" routerLinkActive="active">משימות</a>
+    </div>
+
+  </nav>
+  }
+
+  <div class="content-area">
+    <router-outlet></router-outlet>
+  </div>
+
+</div>

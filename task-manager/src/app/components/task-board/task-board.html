@@ -1,0 +1,292 @@
+<!-- <div class="page-container">
+  <header class="Project-header">
+    <h1>לוח משימות 🚀</h1>
+    <div class="search-wrapper">
+      <span class="search-icon">Q</span>
+      <input type="text" placeholder="חיפוש משימה..." (input)="updateSearch($event)" class="search-input">
+    </div>
+    <button (click)="toggleCreate()" class="circle-btn">
+      {{ isCreateOpen() ? '✖' : '➕' }}
+    </button>
+  </header>
+
+  @if (isCreateOpen()) {
+  <div class="create-team-box slide-in">
+    <input type="text" [formControl]="newTaskControl" placeholder="שם משימה חדשה...">
+    <button (click)="createNewTask()" [disabled]="newTaskControl.invalid">שמור</button>
+  </div>
+  }
+
+  <main class="board-container">
+    @if (tasksService.isLoading()) {
+    <div class="loading">טוען משימות...</div>
+    }
+    @else {
+    <div class="board-columns" cdkDropListGroup>
+
+      <div class="column">
+        <div class="column-header header-todo">
+          <h2>לביצוע 📝</h2>
+          <span class="badge">{{ todoTasks().length }}</span>
+        </div>
+        <div cdkDropList id="todo" (cdkDropListDropped)="drop($event)" class="task-list">
+          @for (task of todoTasks(); track task.id) {
+          <div class="task-card" cdkDrag [cdkDragData]="task" [ngClass]="task.priority">
+            <div class="card-content">
+              <div class="card-top">
+                <h3>{{ task.title }}</h3>
+                <button class="delete-btn" (click)="deleteTask(task.id)">🗑️</button>
+              </div>
+              <p class="desc">{{ task.description }}</p>
+              <div class="card-footer">
+                <select [value]="task.priority" (change)="updatePriority(task, $event)"
+                  (mousedown)="$event.stopPropagation()" class="priority-select">
+                  <option value="low">נמוכה 🟢</option>
+                  <option value="normal">רגילה 🔵</option>
+                  <option value="high">גבוהה 🔴</option>
+                </select>
+              </div>
+            </div>
+            <div *cdkDragPlaceholder class="custom-placeholder"></div>
+          </div>
+          }
+        </div>
+      </div>
+
+      <div class="column">
+        <div class="column-header header-progress">
+          <h2>בעבודה 🔨</h2>
+          <span class="badge">{{ inProgressTasks().length }}</span>
+        </div>
+        <div cdkDropList id="in_progress" (cdkDropListDropped)="drop($event)" class="task-list">
+          @for (task of inProgressTasks(); track task.id) {
+          <div class="task-card" cdkDrag [cdkDragData]="task" [ngClass]="task.priority">
+            <div class="card-content">
+              <div class="card-top">
+                <h3>{{ task.title }}</h3>
+                <button class="delete-btn" (click)="deleteTask(task.id)">🗑️</button>
+              </div>
+              <p class="desc">{{ task.description }}</p>
+              <div class="card-footer">
+                <select [value]="task.priority" (change)="updatePriority(task, $event)"
+                  (mousedown)="$event.stopPropagation()" class="priority-select">
+                  <option value="low">נמוכה 🟢</option>
+                  <option value="normal">רגילה 🔵</option>
+                  <option value="high">גבוהה 🔴</option>
+                </select>
+              </div>
+            </div>
+            <div *cdkDragPlaceholder class="custom-placeholder"></div>
+          </div>
+          }
+        </div>
+      </div>
+
+      <div class="column">
+        <div class="column-header header-done">
+          <h2>בוצע ✅</h2>
+          <span class="badge">{{ doneTasks().length }}</span>
+        </div>
+        <div cdkDropList id="done" (cdkDropListDropped)="drop($event)" class="task-list">
+          @for (task of doneTasks(); track task.id) {
+          <div class="task-card" cdkDrag [cdkDragData]="task" [ngClass]="task.priority">
+            <div class="card-content">
+              <div class="card-top">
+                <h3 class="strikethrough">{{ task.title }}</h3>
+                <button class="delete-btn" (click)="deleteTask(task.id)">🗑️</button>
+              </div>
+              <p class="desc">{{ task.description }}</p>
+
+
+              <div class="card-footer">
+                <select [value]="task.priority" (change)="updatePriority(task, $event)"
+                  (mousedown)="$event.stopPropagation()" class="priority-select">
+                  <option value="low">נמוכה 🟢</option>
+                  <option value="normal">רגילה 🔵</option>
+                  <option value="high">גבוהה 🔴</option>
+                </select>
+              </div>
+
+            </div>
+            <div *cdkDragPlaceholder class="custom-placeholder"></div>
+          </div>
+          }
+        </div>
+      </div>
+
+    </div>
+    }
+  </main>
+</div>
+ -->
+
+
+
+ <div class="page-container">
+
+  <header class="Project-header">
+    <div class="header-right">
+      <h1>לוח משימות 🚀</h1>
+    </div>
+
+    <div class="search-wrapper">
+      <span class="search-icon">🔍</span>
+      <input type="text" 
+             placeholder="חיפוש משימה..." 
+             (input)="updateSearch($event)" 
+             class="search-input">
+    </div>
+
+    <button (click)="toggleCreate()" class="circle-btn">
+      {{ isCreateOpen() ? '✖' : '➕' }}
+    </button>
+  </header>
+
+  @if (isCreateOpen()) {
+  <div class="create-team-box slide-in">
+    <input type="text" [formControl]="newTaskControl" placeholder="שם משימה חדשה...">
+    <button (click)="createNewTask()" [disabled]="newTaskControl.invalid">שמור</button>
+  </div>
+  }
+
+  <main class="board-container">
+    @if (tasksService.isLoading()) {
+    <div class="loading">טוען משימות...</div>
+    }
+    @else {
+    <div class="board-columns" cdkDropListGroup>
+
+      <div class="column">
+        <div class="column-header header-todo">
+          <h2>לביצוע 📝</h2>
+          <span class="badge">{{ todoTasks().length }}</span>
+        </div>
+        <div cdkDropList id="todo" (cdkDropListDropped)="drop($event)" class="task-list">
+          @for (task of todoTasks(); track task.id) {
+            <div class="task-card" cdkDrag [cdkDragData]="task" [ngClass]="task.priority">
+              <div class="card-content">
+                <div class="card-top">
+                  <h3>{{ task.title }}</h3>
+                  <button class="delete-btn" (click)="deleteTask(task.id)">🗑️</button>
+                </div>
+                <p class="desc">{{ task.description }}</p>
+                <div class="card-footer">
+                  <select [value]="task.priority" (change)="updatePriority(task, $event)"
+                    (mousedown)="$event.stopPropagation()" class="priority-select">
+                    <option value="low">נמוכה 🟢</option>
+                    <option value="normal">רגילה 🔵</option>
+                    <option value="high">גבוהה 🔴</option>
+                  </select>
+                  <button class="icon-btn comment-btn" (click)="openComments(task)" (mousedown)="$event.stopPropagation()" title="צפה בתגובות">
+                    💬
+                  </button>
+                </div>
+              </div>
+              <div *cdkDragPlaceholder class="custom-placeholder"></div>
+            </div>
+          }
+        </div>
+      </div>
+
+      <div class="column">
+        <div class="column-header header-progress">
+          <h2>בעבודה 🔨</h2>
+          <span class="badge">{{ inProgressTasks().length }}</span>
+        </div>
+        <div cdkDropList id="in_progress" (cdkDropListDropped)="drop($event)" class="task-list">
+          @for (task of inProgressTasks(); track task.id) {
+            <div class="task-card" cdkDrag [cdkDragData]="task" [ngClass]="task.priority">
+              <div class="card-content">
+                <div class="card-top">
+                  <h3>{{ task.title }}</h3>
+                  <button class="delete-btn" (click)="deleteTask(task.id)">🗑️</button>
+                </div>
+                <p class="desc">{{ task.description }}</p>
+                <div class="card-footer">
+                  <select [value]="task.priority" (change)="updatePriority(task, $event)"
+                    (mousedown)="$event.stopPropagation()" class="priority-select">
+                    <option value="low">נמוכה 🟢</option>
+                    <option value="normal">רגילה 🔵</option>
+                    <option value="high">גבוהה 🔴</option>
+                  </select>
+                  <button class="icon-btn comment-btn" (click)="openComments(task)" (mousedown)="$event.stopPropagation()" title="צפה בתגובות">
+                    💬
+                  </button>
+                </div>
+              </div>
+              <div *cdkDragPlaceholder class="custom-placeholder"></div>
+            </div>
+          }
+        </div>
+      </div>
+
+      <div class="column">
+        <div class="column-header header-done">
+          <h2>בוצע ✅</h2>
+          <span class="badge">{{ doneTasks().length }}</span>
+        </div>
+        <div cdkDropList id="done" (cdkDropListDropped)="drop($event)" class="task-list">
+          @for (task of doneTasks(); track task.id) {
+            <div class="task-card" cdkDrag [cdkDragData]="task" [ngClass]="task.priority">
+              <div class="card-content">
+                <div class="card-top">
+                  <h3 class="strikethrough">{{ task.title }}</h3>
+                 
+                  <button class="delete-btn" (click)="deleteTask(task.id)">🗑️</button>
+                </div>
+                <p class="desc">{{ task.description }}</p>
+                <div class="card-footer">
+                  <select [value]="task.priority" (change)="updatePriority(task, $event)"
+                    (mousedown)="$event.stopPropagation()" class="priority-select">
+                    <option value="low">נמוכה 🟢</option>
+                    <option value="normal">רגילה 🔵</option>
+                    <option value="high">גבוהה 🔴</option>
+                  </select>
+                  <button class="icon-btn comment-btn" (click)="openComments(task)" (mousedown)="$event.stopPropagation()" title="צפה בתגובות">
+                    💬
+                  </button>
+                </div>
+              </div>
+              <div *cdkDragPlaceholder class="custom-placeholder"></div>
+            </div>
+          }
+        </div>
+      </div>
+
+    </div>
+    }
+  </main>
+
+  @if (selectedTask(); as task) {
+    <div class="overlay" (click)="closeComments()"></div>
+    
+    <div class="comments-panel slide-in">
+      <div class="panel-header">
+        <h3>תגובות: {{ task.title }}</h3>
+        <button class="close-btn" (click)="closeComments()">✖</button>
+      </div>
+  
+      <div class="comments-list">
+        @for (comment of currentComments(); track comment.id) {
+          <div class="comment-bubble">
+            <div class="comment-author">{{ comment.author_name || 'משתמש' }}</div>
+            <div class="comment-body">{{ comment.body }}</div>
+            <div class="comment-time">{{ comment.created_at | date:'short' }}</div>
+          </div>
+        } @empty {
+          <div class="no-comments">אין תגובות עדיין. כתוב משהו! ✍️</div>
+        }
+      </div>
+  
+      <div class="panel-footer">
+        <input 
+          type="text" 
+          [formControl]="newCommentControl" 
+          (keydown.enter)="sendComment()"
+          placeholder="הוסף תגובה...">
+        <button (click)="sendComment()" [disabled]="newCommentControl.invalid">שלח ➤</button>
+      </div>
+    </div>
+  }
+</div>
+

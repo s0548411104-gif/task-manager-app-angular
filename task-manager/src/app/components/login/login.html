@@ -1,0 +1,32 @@
+<div class="auth-container">
+  <h2>כניסה למערכת</h2>
+  <div class="auth-wrapper">
+  <div class="auth-card">
+    
+    <div class="auth-tabs">
+      <a routerLink="/login" routerLinkActive="active-tab" class="tab">התחברות</a>
+      <a routerLink="/register" routerLinkActive="active-tab" class="tab">הרשמה</a>
+    </div>
+
+    <div class="auth-content">
+       </div>
+
+  </div>
+</div>
+  <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+    
+    <div class="form-group">
+      <label>אימייל</label>
+      <input type="email" formControlName="email">
+    </div>
+
+    <div class="form-group">
+      <label>סיסמה</label>
+      <input type="password" formControlName="password">
+    </div>
+
+    <button type="submit" [disabled]="!loginForm.valid">התחבר</button>
+    
+    <p>אין לך חשבון? <a routerLink="/register">הירשם כאן</a></p>
+  </form>
+</div>
