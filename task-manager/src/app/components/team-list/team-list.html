@@ -1,8 +1,6 @@
 <div class="page-container">
-
   <header class="teams-header">
     <h1>הצוותים שלי</h1>
-
     <button (click)="toggleCreate()" class="circle-btn">
       @if (isCreateOpen()) { ✖ } @else { ➕ }
     </button>
@@ -18,7 +16,6 @@
   }
 
   <main class="teams-grid">
-
     @if (teamsService.isLoading()) {
     <div class="status-msg">טוען נתונים... ⏳</div>
     }
@@ -28,10 +25,9 @@
     }
 
     @else {
-
     @for (team of teamsService.myTeams(); track team.id) {
-
     <div class="team-card">
+      
       <div class="card-top">
         <h3>{{ team.name }}</h3>
         <div class="card-actions">
@@ -43,7 +39,45 @@
       <div class="card-info">
         <span>👥 {{ team.members?.length || 0 }} חברים</span>
       </div>
-      <button class="enter-btn" [routerLink]="['/teams', team.id, 'projects']">צפה בפרויקטים</button>
+
+      <div class="members-list">
+        <strong>חברי הצוות:</strong>
+        @if (!team.members || team.members.length === 0) {
+          <p>אין עדיין חברים בצוות זה.</p>
+        } @else {
+          <ul>
+            @for (member of team.members; track member.id) {
+            <li>
+              {{ member.name }}
+            </li>
+            }
+          </ul>
+        }
+      </div>
+
+      <div class="actions">
+        <button (click)="toggleAddMember(team.id)" class="add-member-toggle">
+          {{ activeTeamForMember() === team.id ? 'ביטול' : '➕ הוסף חבר' }}
+        </button>
+        <button class="enter-btn" [routerLink]="['/teams', team.id, 'projects']">צפה בפרויקטים</button>
+      </div>
+
+      @if (activeTeamForMember() === team.id) {
+      <div class="add-member-box slide-in">
+        <label>בחר חבר להוספה:</label>
+        <select [formControl]="selectedUserEmail">
+          <option value="" disabled selected>-- בחר משתמש --</option>
+          @for (user of teamsService.allUsers(); track user.id) {
+          <option [value]="user.id">
+            {{ user.name }}
+          </option>
+          }
+        </select>
+        <button (click)="submitAddMember(team.id)" [disabled]="selectedUserEmail.invalid" class="confirm-btn">
+          אישור הוספה
+        </button>
+      </div>
+      }
     </div>
 
     } @empty {

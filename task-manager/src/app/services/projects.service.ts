@@ -17,6 +17,7 @@ export class ProjectsService {
   isLoading = signal<boolean>(false);
   error = signal<string | null>(null);
 
+  // טעינת פרויקטים עם טיפול בשגיאת "אין צוות" (403)
   loadProjects() {
     this.isLoading.set(true);
     this.error.set(null);
@@ -28,8 +29,6 @@ export class ProjectsService {
       },
       error: (err) => {
         console.error('Error loading projects:', err);
-        // התיקון הקריטי: אם השרת מחזיר 403 (כי אין לך עדיין צוות), 
-        // אנחנו מגדירים רשימה ריקה במקום לתת לאפליקציה לקרוס ולזרוק אותך ל-Login
         if (err.status === 403) {
           this.myProjects.set([]); 
           this.error.set(null); 
@@ -42,40 +41,32 @@ export class ProjectsService {
   }
 
   addProject(teamId: string, name: string, description: string) {
-    const teamsUrl = `${this.baseUrl}/teams`;
+  // אנחנו יוצרים גוף בקשה (Body) שמשתמש ב-ID שהגיע מהקומפוננטה (14)
+  const body = { 
+    teamId: Number(teamId), 
+    name, 
+    description 
+  };
 
-    // שלב 1: בדיקה אם יש צוות קיים (מניעת 403 בשרת)
-    return this.http.get<any[]>(teamsUrl).pipe(
-      switchMap((teams) => {
-        if (teams && teams.length > 0) {
-          return of(teams[0].id);
-        } else {
-          // אין צוות - ניצור אחד חדש. השרת יוסיף אותך אוטומטית כ-Owner
-          return this.http.post<any>(teamsUrl, { name: 'My Workspace' }).pipe(
-            map(newTeam => newTeam.id)
-          );
-        }
-      }),
-      // שלב 2: יצירת הפרויקט עם ה-teamId החוקי
-      switchMap((validTeamId) => {
-        const body = { teamId: validTeamId, name, description };
-        return this.http.post<Project>(this.apiUrl, body);
-      }),
-      // שלב 3: עדכון הרשימה בתצוגה
-      tap((newProject) => {
-        this.myProjects.update(list => [...list, newProject]);
-      }),
-      catchError((err) => {
-        this.error.set('שגיאה ביצירת הפרויקט');
-        return throwError(() => err);
-      })
-    );
-  }
+  // שליחה ישירה לשרת בלי לבדוק צוותים אחרים בדרך
+  return this.http.post<Project>(this.apiUrl, body).pipe(
+    tap((newProject) => {
+      // עדכון הרשימה בתצוגה
+      this.myProjects.update(list => [...list, newProject]);
+    }),
+    catchError((err) => {
+      this.error.set('שגיאה ביצירת הפרויקט');
+      return throwError(() => err);
+    })
+  );
+}
+
+  // --- פונקציות ה-CRUD הנוספות (קיימות רק בגרסה 1) ---
 
   deleteProject(projectId: string) {
     return this.http.delete(`${this.apiUrl}/${projectId}`).pipe(
       tap(() => {
-        // עדכון ה-Signal: מסננים החוצה את הפרויקט שנמחק
+        // הסרה מהתצוגה מיד לאחר מחיקה מוצלחת
         this.myProjects.update(list => list.filter(p => p.id !== projectId));
       })
     );
@@ -84,6 +75,7 @@ export class ProjectsService {
   updateProject(projectId: string, name: string) {
     return this.http.patch<Project>(`${this.apiUrl}/${projectId}`, { name }).pipe(
       tap((updatedProj) => {
+        // עדכון הפרויקט הספציפי בתוך הרשימה הקיימת
         this.myProjects.update(projects => 
           projects.map(p => p.id === projectId ? updatedProj : p)
         );

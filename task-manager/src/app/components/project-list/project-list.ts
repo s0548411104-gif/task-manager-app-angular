@@ -1,8 +1,8 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { ProjectsService } from '../../services/projects.service';
 import { CommonModule, DatePipe } from '@angular/common';
 import { FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
-import { RouterLink, ActivatedRoute } from '@angular/router'; // הוספתי את ActivatedRoute
+import { RouterLink, ActivatedRoute } from '@angular/router';
 
 @Component({
   selector: 'app-project-list',
@@ -13,28 +13,47 @@ import { RouterLink, ActivatedRoute } from '@angular/router'; // הוספתי א
 })
 export class ProjectList implements OnInit {
   projectsService = inject(ProjectsService);
-  private route = inject(ActivatedRoute); // 👇 הוספתי: זה הכלי שקורא את הכתובת
+  private route = inject(ActivatedRoute);
 
-  teamIdControl = new FormControl(''); // הורדתי את ה-Required כי אנחנו משיגים אותו אוטומטית
+  // טופס יצירה
   nameControl = new FormControl('', [Validators.required, Validators.minLength(3)]);
   descControl = new FormControl('', [Validators.required, Validators.minLength(3)]);
-
+  
+  // משתני מצב
   isCreateOpen = signal(false);
-  currentTeamId = '';
+  currentTeamId = ''; 
+  teamIdSignal = signal<string>(''); 
 
-  // --- משתנים חדשים לעריכה ---
+  // --- לוגיקת סינון ---
+  filteredProjects = computed(() => {
+    const allProjects = this.projectsService.myProjects();
+    const tid = this.teamIdSignal();
+    // אם אין ID בכתובת, אנחנו מציגים את כל הפרויקטים (לפי הנתיב /projects הכללי)
+    if (!tid) return allProjects; 
+    return allProjects.filter(p => String(p.team_id) === tid);
+  });
+
+  // --- משתני עריכה ---
   editingProjectId = signal<string | null>(null); 
   editNameControl = new FormControl('', [Validators.required, Validators.minLength(3)]);
 
   ngOnInit() {
-    // 👇 התיקון החשוב: משיכת ה-ID מהכתובת
-    // מנסה למצוא 'teamId'. אם לא מוצא, מנסה למצוא 'id'.
-    this.currentTeamId = this.route.snapshot.paramMap.get('teamId') || 
-                         this.route.snapshot.paramMap.get('id') || '';
+    /**
+     * שינוי קטן אך קריטי: 
+     * אנחנו נרשמים לשינויים בפרמטרים כדי להתעדכן בזמן אמת.
+     */
+    this.route.paramMap.subscribe(params => {
+      // אנחנו מחפשים את ה-teamId (מהנתיב הספציפי) או את ה-id (מהנתיב הכללי)
+      const id = params.get('teamId') || params.get('id') || '';
+      
+      // חשוב: אנחנו מעדכנים את המשתנה בערך החדש (אפילו אם הוא ריק)
+      // זה מה שמונע מה-ID של "שולמית" להישאר שם לתמיד
+      this.currentTeamId = id;
+      this.teamIdSignal.set(id); 
 
-    console.log('🔍 ה-ID שנמצא בכתובת הוא:', this.currentTeamId);
-
-    this.projectsService.loadProjects();
+      console.log('📍 ה-ID המעודכן בכתובת הוא:', id || 'ריק (נתיב כללי)');
+      this.projectsService.loadProjects();
+    });
   }
 
   toggleCreate() {
@@ -42,64 +61,54 @@ export class ProjectList implements OnInit {
   }
 
   createNewProj() {
-    // בדיקה 1: האם הכפתור בכלל עובד?
-    alert('שלב 1: הפונקציה התחילה! הכפתור עובד.');
+    // השארתי את ה-Alerts לבקשתך
+    alert('שלב 1: הפונקציה התחילה!');
 
-    // בדיקה 2: האם יש לנו ID של צוות?
+    // אם אנחנו בנתיב הכללי /projects, אין לנו teamId ואי אפשר ליצור פרויקט
     if (!this.currentTeamId) {
-      alert('עצור! 🛑 הבעיה היא שאין לי ID של צוות (ריק). תסתכלי בקונסול.');
+      alert('עצור! 🛑 לא ניתן ליצור פרויקט בנתיב הכללי. אנא כנסי לצוות ספציפי דרך דף הצוותים.');
+      console.error('Missing currentTeamId - check your URL');
       return;
     }
-    alert('שלב 2: יש ID צוות: ' + this.currentTeamId);
+    
+    // כאן תראי ב-Alert את ה-ID האמיתי שיישלח ב-Payload
+    alert('שלב 2: שולח בקשה ליצירה בצוות מספר: ' + this.currentTeamId);
 
-    // בדיקה 3: האם הטופס תקין?
     if (this.nameControl.invalid) {
-      alert('עצור! 🛑 הטופס לא תקין. בדקי שכתבת לפחות 3 אותיות בשם.');
+      alert('עצור! 🛑 שם הפרויקט קצר מדי.');
       return;
     }
+
     const nameVal = this.nameControl.value!;
     const descVal = this.descControl.value || '';
-    alert('שלב 3: הנתונים תקינים. שם: ' + nameVal);
-
-    // בדיקה 4: ניסיון שליחה
-    alert('שלב 4: מנסה לשלוח לשרת... תמתיני רגע.');
 
     this.projectsService.addProject(this.currentTeamId, nameVal, descVal).subscribe({
       next: (res) => {
-        alert('✅ הצלחה! השרת החזיר תשובה חיובית!');
-        console.log(res);
+        alert('✅ הצלחה! הפרויקט נוצר בצוות ' + this.currentTeamId);
         this.isCreateOpen.set(false);
         this.nameControl.reset();
         this.descControl.reset();
-        this.projectsService.loadProjects(); // רענון הרשימה
+        this.projectsService.loadProjects(); 
       },
       error: (err) => {
-        alert('❌ שגיאה! השרת נכשל.');
-        console.log('פרטי השגיאה:', err);
-        alert('הודעת השגיאה מהשרת: ' + JSON.stringify(err.error || err.message));
+        alert('❌ שגיאה ביצירה. בדקי את הקונסול.');
+        console.error('פרטי השגיאה:', err);
       }
     });
   }
 
-  // --- הפונקציה החדשה למחיקה ---
+  // --- פונקציות מחיקה ועריכה ---
+
   deleteProject(projectId: string, event: Event) {
-    event.stopPropagation(); // מונע מהכרטיס להיפתח כשלוחצים על המחיקה
-    
+    event.stopPropagation();
     if (confirm('בטוחה שאת רוצה למחוק את הפרויקט?')) {
       this.projectsService.deleteProject(projectId).subscribe({
-        next: () => {
-          console.log('Project deleted');
-        },
-        error: (err) => {
-          console.error('Delete failed', err);
-          alert('שגיאה במחיקה');
-        }
+        next: () => console.log('Project deleted'),
+        error: (err) => alert('שגיאה במחיקה')
       });
     }
   }
 
-  // --- פונקציות חדשות לעריכה ---
-  
   startEdit(project: any, event: Event) {
     event.stopPropagation();
     this.editingProjectId.set(project.id);
